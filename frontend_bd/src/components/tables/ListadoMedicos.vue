@@ -1,5 +1,6 @@
+<!-- views/Medico/ListadoMedicos.vue -->
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import MedicoDialog from '@/components/modals/MedicoDialog.vue'
 import { getAllMedicos, deleteMedico } from '@/functions.js'
 import { exportToPDF } from '@/utils/exportToPdf'
@@ -8,15 +9,6 @@ import { exportToPDF } from '@/utils/exportToPdf'
 const data = ref([])
 const openCreateDialog = ref(false)
 const selectedMedico = ref(null)
-
-// Filtros
-const hospitales = ref([])
-const departamentos = ref([])
-const unidades = ref([])
-
-const selectedHospital = ref('')
-const selectedDepartamento = ref('')
-const selectedUnidad = ref('')
 
 // Encabezados de la tabla
 const headers = ref([
@@ -38,22 +30,17 @@ async function cargarDatos() {
   const medicos = await getAllMedicos()
   data.value = medicos.map(m => ({
     cod_medico: m.cod_Med,
-    nombre_Med: m.nombre_Med,
-    Apellidos: m.Apellidos,
+    nombre_Med:m.nombre_Med,
+    Apellidos:m.Apellidos,
     especialidad: m.especialidad,
     licencia: m.num_Licencia,
     telefono: m.telefono,
-    anios_Expmed: m.anios_Expmed,
+    anios_experiencia: m.anios_Expmed,
     contacto: m.datos_Contacto,
     unidad: m.cod_Unidad,
     departamento: m.cod_Dpto,
     hospital: m.cod_Hosp
   }))
-
-  // Cargar opciones para filtros
-  hospitales.value = [...new Set(data.value.map(d => d.hospital))]
-  departamentos.value = [...new Set(data.value.map(d => d.departamento))]
-  unidades.value = [...new Set(data.value.map(d => d.unidad))]
 }
 
 function abrirModalAgregar() {
@@ -62,23 +49,24 @@ function abrirModalAgregar() {
 }
 
 function editarMedico(medico) {
+  console.log('Editar médico:', medico)
   selectedMedico.value = medico
   openCreateDialog.value = true
 }
 
 async function handleDelete(medico) {
-  if (!confirm('¿Estás seguro de eliminar este médico?')) return
-  try {
-    await deleteMedico(
-      medico.cod_medico,
-      medico.unidad,
-      medico.departamento,
-      medico.hospital
-    )
-    await cargarDatos()
-  } catch (err) {
-    alert(`❌ Error al eliminar: ${err.response?.data?.error || err.message}`)
-  }
+  confirm('¿Estás seguro de eliminar este médico?')
+    try {
+      await deleteMedico(
+        medico.cod_medico,
+        medico.unidad,
+        medico.departamento,
+        medico.hospital
+      )
+      await cargarDatos()
+    } catch (err) {
+      alert(`❌ Error al eliminar: ${err.response?.data?.error || err.message}`)
+    }
 }
 
 // Exportar a PDF
@@ -94,17 +82,6 @@ function exportarAPDF() {
 
   exportToPDF(data.value, headersPDF, columnsPDF, 'medicos_lista', 'Listado de Médicos')
 }
-
-// Filtrar datos dinámicamente
-const filteredData = computed(() => {
-  return data.value.filter(item => {
-    let match = true
-    if (selectedHospital.value) match &&= item.hospital === selectedHospital.value
-    if (selectedDepartamento.value) match &&= item.departamento === selectedDepartamento.value
-    if (selectedUnidad.value) match &&= item.unidad === selectedUnidad.value
-    return match
-  })
-})
 
 onMounted(() => {
   cargarDatos()
@@ -122,40 +99,7 @@ onMounted(() => {
     </v-btn>
   </v-container>
 
-  <!-- FILTROS -->
-  <v-container fluid class="mt-4">
-    <v-row dense>
-      <v-col cols="12" sm="4">
-        <v-select
-          v-model="selectedHospital"
-          :items="hospitales"
-          label="Filtrar por Hospital"
-          clearable
-          hide-details
-        />
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-select
-          v-model="selectedDepartamento"
-          :items="departamentos"
-          label="Filtrar por Departamento"
-          clearable
-          hide-details
-        />
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-select
-          v-model="selectedUnidad"
-          :items="unidades"
-          label="Filtrar por Unidad"
-          clearable
-          hide-details
-        />
-      </v-col>
-    </v-row>
-  </v-container>
-
-  <h2 v-if="filteredData.length == 0">No hay médicos con esos filtros</h2>
+  <h2 v-if="data.length == 0">No hay médicos registrados</h2>
 
   <v-container fluid width="90vw" v-else>
     <v-table fixed-header height="400px">
@@ -165,17 +109,17 @@ onMounted(() => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, idx) in filteredData" :key="idx">
+        <tr v-for="(item, idx) in data" :key="idx">
           <td>{{ item.cod_medico }}</td>
           <td>{{ item.nombre_Med }}</td>
           <td>{{ item.Apellidos }}</td>
           <td>{{ item.especialidad }}</td>
           <td>{{ item.licencia }}</td>
           <td>{{ item.telefono }}</td>
-          <td>{{ item.anios_Expmed }}</td>
+          <td>{{ item.anios_experiencia }}</td>
           <td>{{ item.contacto }}</td>
           <td>{{ item.unidad }}</td>
-          <td>{{ item.departamento }}</td>
+          <td>{{ item.departamento }}</td> 
           <td>{{ item.hospital }}</td>
           <td class="d-flex justify-end" style="gap: 8px;">
             <v-btn icon size="x-small" color="primary" title="Editar" @click="editarMedico(item)">
@@ -192,10 +136,10 @@ onMounted(() => {
 
   <!-- Modal para crear/editar -->
   <MedicoDialog
-    v-model="openCreateDialog"
-    :medico="selectedMedico"
-    @submit="cargarDatos"
-  />
+  v-model="openCreateDialog"
+  :medico="selectedMedico"
+  @submit="cargarDatos"
+/>
 </template>
 
 <style scoped>

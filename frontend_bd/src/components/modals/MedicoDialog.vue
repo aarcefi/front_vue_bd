@@ -1,6 +1,6 @@
 <script setup>
 import { defineProps, defineEmits, ref, watch } from 'vue'
-import { createMedico, updateMedico } from '@/functions'
+import { createMedico, updateMedico } from '@/functions.js'
 
 const props = defineProps({
   modelValue: {
@@ -15,6 +15,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'submit'])
 
+// Campos reactivos del formulario
 const cod_Med = ref('')
 const nombre_Med = ref('')
 const apellidos = ref('')
@@ -36,14 +37,14 @@ watch(() => props.medico, (nuevo) => {
   if (nuevo) {
     cod_Med.value = nuevo.cod_medico
     nombre_Med.value = nuevo.nombre_Med
-    apellidos.value = nuevo.Apellidos
-    especialidad.value = nuevo.especialidad
-    num_Licencia.value = nuevo.licencia
-    telefono.value = nuevo.telefono
+    apellidos.value = nuevo.Apellidos 
+    especialidad.value = nuevo.especialidad 
+    num_Licencia.value = nuevo.licencia 
+    telefono.value = nuevo.telefono 
     anios_Expmed.value = nuevo.anios_experiencia
-    datos_Contacto.value = nuevo.contacto
+    datos_Contacto.value = nuevo.contacto 
     cod_Unidad.value = nuevo.unidad
-    cod_Dpto.value = nuevo.departamento
+    cod_Dpto.value = nuevo.departamento 
     cod_Hptal.value = nuevo.hospital
     isEdit.value = true
   } else {
@@ -69,12 +70,12 @@ function limpiarFormulario() {
 
 async function handleSubmit() {
   // Validaciones básicas
-  if (!cod_Med.value || !nombre_Med.value.trim() || !especialidad.value.trim() ||
+  if (!cod_Med.value || !nombre_Med.value.trim() || !especialidad.value.trim() || 
       !num_Licencia.value || !cod_Unidad.value || !cod_Dpto.value || !cod_Hptal.value) {
     errorMessage.value = 'Complete todos los campos obligatorios'
     return
   }
-
+  
   const datos = {
     cod_Med: parseInt(cod_Med.value),
     nombre_Med: nombre_Med.value.trim(),
@@ -87,23 +88,26 @@ async function handleSubmit() {
     cod_Unidad: parseInt(cod_Unidad.value),
     cod_Dpto: parseInt(cod_Dpto.value),
     cod_Hptal: parseInt(cod_Hptal.value)
-
+    
   }
+  
   try {
     let resultado
-
+   
     if (isEdit.value) {
-      resultado = await updateMedico( datos)
+      await updateMedico( datos)
     } else {
-      resultado = await createMedico(datos)
-  
+       await createMedico(datos)
+      
+    }
 
-    if (resultado.success){
+    if (resultado?.success) {
       emit('submit')
       emit('update:modelValue', false)
       creationDialog.value = true
-    }  
-  }
+    } else {
+      errorMessage.value = resultado?.error
+    }
   } catch (err) {
     console.error('Error:', err)
     errorMessage.value = err.response?.data?.error || err.message || 'Error desconocido'
@@ -113,19 +117,19 @@ async function handleSubmit() {
 
 <template>
   <v-dialog
-      :model-value="modelValue"
-      @update:model-value="$emit('update:modelValue', $event)"
-      max-width="600"
-      persistent
+    :model-value="modelValue"
+    @update:model-value="$emit('update:modelValue', $event)"
+    max-width="600"
+    persistent
   >
     <v-card>
       <v-card-title>{{ isEdit ? 'Editar Médico' : 'Nuevo Médico' }}</v-card-title>
       <v-card-text>
         <!-- Mensaje de error -->
         <v-alert
-            v-if="errorMessage"
-            type="error"
-            class="mb-4"
+          v-if="errorMessage"
+          type="error"
+          class="mb-4"
         >
           {{ errorMessage }}
         </v-alert>
@@ -133,78 +137,78 @@ async function handleSubmit() {
         <v-container>
           <v-row dense>
             <v-col cols="12" sm="6">
-              <v-text-field
-                  label="Código Médico"
-                  v-model.number="cod_Med"
-                  required
-                  :disabled="isEdit"
+              <v-text-field 
+                label="Código Médico" 
+                v-model.number="cod_Med" 
+                required 
+                :disabled="isEdit"
               />
             </v-col>
             <v-col cols="12" sm="6">
-              <v-text-field
-                  label="Nombre del Médico"
-                  v-model="nombre_Med"
-                  required
+              <v-text-field 
+                label="Nombre del Médico" 
+                v-model="nombre_Med" 
+                required 
               />
             </v-col>
             <v-col cols="12" sm="6">
-              <v-text-field
-                  label="Apellidos"
-                  v-model="apellidos"
+              <v-text-field 
+                label="Apellidos" 
+                v-model="apellidos" 
               />
             </v-col>
             <v-col cols="12" sm="6">
-              <v-text-field
-                  label="Especialidad"
-                  v-model="especialidad"
-                  required
+              <v-text-field 
+                label="Especialidad" 
+                v-model="especialidad" 
+                required 
               />
             </v-col>
             <v-col cols="12" sm="6">
-              <v-text-field
-                  label="Licencia Médica"
-                  v-model.number="num_Licencia"
-                  required :disabled="isEdit"
+              <v-text-field 
+                label="Licencia Médica" 
+                v-model.number="num_Licencia" 
+                required :disabled="isEdit"
               />
             </v-col>
             <v-col cols="12" sm="6">
-              <v-text-field
-                  label="Teléfono"
-                  v-model="telefono"
+              <v-text-field 
+                label="Teléfono" 
+                v-model="telefono" 
               />
             </v-col>
             <v-col cols="12" sm="6">
-              <v-text-field
-                  label="Años de experiencia"
-                  type="number"
-                  v-model.number="anios_Expmed"
+              <v-text-field 
+                label="Años de experiencia" 
+                type="number" 
+                v-model.number="anios_Expmed" 
               />
             </v-col>
             <v-col cols="12" sm="6">
-              <v-text-field
-                  label="Datos de contacto"
-                  v-model="datos_Contacto"
+              <v-text-field 
+                label="Datos de contacto" 
+                v-model="datos_Contacto" 
               />
             </v-col>
             <v-col cols="12" sm="4">
-              <v-text-field
-                  label="Código Unidad"
-                  v-model.number="cod_Unidad"
-                  required :disabled="isEdit"
+              <v-text-field 
+                label="Código Unidad" 
+                v-model.number="cod_Unidad" 
+                required :disabled="isEdit"
               />
             </v-col>
             <v-col cols="12" sm="4">
-              <v-text-field
-                  label="Código Departamento"
-                  v-model.number="cod_Dpto"
-                  required :disabled="isEdit"
+              <v-text-field 
+                label="Código Departamento" 
+                v-model.number="cod_Dpto" 
+                required :disabled="isEdit"
               />
             </v-col>
             <v-col cols="12" sm="4">
-              <v-text-field
-                  label="Código Hospital"
-                  v-model.number="cod_Hptal"
-                  required :disabled="isEdit"
+              <v-text-field 
+                label="Código Hospital" 
+                v-model.number="cod_Hptal" 
+                required :disabled="isEdit"
               />
             </v-col>
           </v-row>
