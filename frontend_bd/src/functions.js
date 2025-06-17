@@ -1,6 +1,65 @@
 import axios from 'axios'
 
-//PACIENTE
+//*******************LOGIN************************************ */
+export async function login(usuario) {
+  const formData = new URLSearchParams()
+  formData.append('username', usuario.username)
+  formData.append('password', usuario.password)
+
+  try {
+    const response = await fetch(`http://localhost:9090/api/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: formData.toString()
+    })
+
+    const data = await response.json()
+    if (data.success === true) {
+      localStorage.setItem('isLoggedIn', 'true')
+      return true
+    } else {
+      alert(data.error || '❌ Credenciales incorrectas')
+      return false
+    }
+  } catch (err) {
+    console.error('Error al iniciar sesión:', err.message)
+    alert('❌ Error al iniciar sesión')
+    return false
+  }
+}
+
+export async function register(usuario) {
+  const formData = new URLSearchParams()
+  formData.append('username', usuario.username)
+  formData.append('password', usuario.password)
+
+  try {
+    const response = await fetch(`http://localhost:9090/api/usuarios/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: formData.toString()
+    })
+
+    const data = await response.json()
+    if (data.success === true) {
+      alert('✅ Registro exitoso')
+      return true
+    } else {
+      alert(data.error || '❌ No se pudo registrar')
+      return false
+    }
+  } catch (err) {
+    console.error('Error al registrar:', err.message)
+    alert('❌ Error al registrar')
+    return false
+  }
+}
+
+//*****************************************PACIENTE
 export async function getPacientes() {
   try {
     const response = await axios.get('http://localhost:9090/api/pacientes/getAll', {
@@ -21,16 +80,16 @@ export async function createPaciente(paciente) {
   formData.append('nombre_Paciente', paciente.nombre_Paciente)
   formData.append('direccion_Paciente', paciente.direccion_Paciente || '')
   formData.append('fecha_Nacimiento', paciente.fecha_Nacimiento)
-  
+
   try {
     const response = await axios.post(
-      'http://localhost:9090/api/pacientes/create',
-      formData.toString(),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-      }
+        'http://localhost:9090/api/pacientes/create',
+        formData.toString(),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+        }
     )
     return response.data
   } catch (error) {
@@ -42,12 +101,12 @@ export async function createPaciente(paciente) {
 export async function deletePaciente(num_Historia_Clinica) {
   try {
     const response = await axios.delete(
-      `http://localhost:9090/api/pacientes/delete/${num_Historia_Clinica}`,
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+        `http://localhost:9090/api/pacientes/delete/${num_Historia_Clinica}`,
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
         },
-      },
     )
     alert(response.statusText)
   } catch (error) {
@@ -73,17 +132,17 @@ export async function updatePaciente(historia, paciente) {
   const formData = new URLSearchParams()
   formData.append('nombre_Paciente', paciente.nombre_Paciente)
   formData.append('direccion_Paciente', paciente.direccion_Paciente || '')
-  formData.append('fecha_Nacimiento', paciente.fecha_Nacimiento) // Asegúrate que esté en formato YYYY-MM-DD
+  formData.append('fecha_Nacimiento', paciente.fecha_Nacimiento) 
 
   try {
     const response = await axios.put(
-      `http://localhost:9090/api/pacientes/update/${historia}`,
-      formData.toString(),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      }
+        `http://localhost:9090/api/pacientes/update/${historia}`,
+        formData.toString(),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
     )
     return response.data
   } catch (error) {
@@ -135,7 +194,7 @@ export async function updateMedico( medico) {
   formData.append('cod_Hptal', medico.cod_Hptal)
 
   try {
-    const response = await axios.put('http://localhost:9090/api/medicos/update', formData.toString(), {
+    const response = await axios.post('http://localhost:9090/api/medicos/update', formData.toString(), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
@@ -150,12 +209,12 @@ export async function updateMedico( medico) {
 export async function deleteMedico(cod_Med, cod_Unidad, cod_Dpto, cod_Hptal) {
   try {
     const response = await axios.delete(
-      `http://localhost:9090/api/medicos/delete/${cod_Med}/${cod_Unidad}/${cod_Dpto}/${cod_Hptal}`,
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      }
+        `http://localhost:9090/api/medicos/delete/${cod_Med}/${cod_Unidad}/${cod_Dpto}/${cod_Hptal}`,
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
     )
     return response.data
   } catch (error) {
@@ -187,7 +246,12 @@ export async function createMedico(medico) {
   return response.data
 }
 
-//------------------------------HOSPITAL
+//------------------------------HOSPITAL---------------
+export async function getHospitales(params) {
+  
+}
+
+
 export async function getAllHospitals() {
   try {
     const response = await axios.get(`http://localhost:9090/api/hospitales/getAll`, {
@@ -276,11 +340,11 @@ export async function getAllDepartamentos() {
 
 export async function updateDepartamento(departamento) {
   const formData = new URLSearchParams()
- formData.append('cod_Dpto', departamento.cod_Dpto)
+  formData.append('cod_Dpto', departamento.cod_Dpto)
   formData.append('nombre_Dpto', departamento.nombre_Dpto)
   formData.append('cod_Hptal', departamento.cod_Hptal)
 
-  
+
   const response = await axios.put(`http://localhost:9090/api/departamentos/update`, formData.toString(), {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -296,7 +360,7 @@ export async function deleteDepartamento(cod_Hptal,cod_Dpto) {
       'Content-Type': 'application/x-www-form-urlencoded'
     }
   })
-  return response.data 
+  return response.data
 }
 
 //----------------------------------UNIDAD
@@ -304,7 +368,7 @@ export async function createUnidad(unidad) {
   const formData = new URLSearchParams()
   formData.append('cod_Unidad', unidad.cod_Unidad)
   formData.append('nombre_Unidad', unidad.nombre_Unidad)
-  formData.append('ubicacion_Hptal', unidad.ubicacion_Hptal || '') 
+  formData.append('ubicacion_Hptal', unidad.ubicacion_Hptal || '')
   formData.append('cod_Dpto', unidad.cod_Dpto)
   formData.append('cod_Hptal', unidad.cod_Hptal)
 
@@ -326,7 +390,7 @@ export async function updateUnidad(unidad) {
   const formData = new URLSearchParams()
   formData.append('cod_Unidad', unidad.cod_Unidad)
   formData.append('nombre_Unidad', unidad.nombre_Unidad)
-  formData.append('ubicacion_Hptal', unidad.ubicacion_Hptal || '') 
+  formData.append('ubicacion_Hptal', unidad.ubicacion_Hptal || '')
   formData.append('cod_Dpto', unidad.cod_Dpto)
   formData.append('cod_Hptal', unidad.cod_Hptal)
   const response = await axios.put(`http://localhost:9090/api/unidades/update/`, formData.toString(), {
@@ -338,16 +402,16 @@ export async function updateUnidad(unidad) {
 }
 
 export async function deleteUnidad( cod_Hptal, cod_Dpto,cod_Unidad) {
-  
-    const response = await axios.delete(
+
+  const response = await axios.delete(
       `http://localhost:9090/api/unidades/delete/${cod_Hptal}/${cod_Dpto}/${cod_Unidad}`,
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       }
-    )
-    return response.data
+  )
+  return response.data
 }
 
 export async function getAllUnidades() {
@@ -364,7 +428,7 @@ export async function getAllUnidades() {
   }
 }
 
-//-------------------------------------REGISTRO
+//-------------------------------------REGISTRO-------------------------
 export async function updateRegistro(historia, cod_Unidad, datos) {
   const formData = new URLSearchParams()
   formData.append('fue_Atendido', datos.fue_Atendido)
@@ -380,20 +444,8 @@ export async function updateRegistro(historia, cod_Unidad, datos) {
 
   return response.data
 }
-export async function deleteRegistro(cod_Unidad,cod_Dpto,cod_Hptal,historia) {
-  try {
-    const response = await axios.delete(
-      `http://localhost:9090/api/registro/delete/${historia}/${cod_Hptal}/${cod_Dpto}/${cod_Unidad}`,
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      },
-    )
-    alert(response.statusText)
-  } catch (error) {
-    alert(error)
-  }
+export async function deleteRegistro(params) {
+  alert("CODIGO DE BORRAR")
 }
 
 export async function getAllRegistros() {
@@ -429,8 +481,8 @@ export async function createRegistro(registro) {
 
     return response.data
   } catch (err) {
-    console.error('Error al crear registro:', err.response?.data || err.message)
-    throw new Error(`No se pudo crear el registro: ${err.message}`)
+    console.error('Error al crear médico:', err.response?.data || err.message)
+    throw new Error(`No se pudo crear el médico: ${err.message}`)
   }
 }
 
@@ -451,8 +503,14 @@ export async function getRegistroByHistoriaUnidad(historia, cod_Unidad) {
 //--------------------------------------INFORME
 export async function createInforme(informe) {
   const formData = new URLSearchParams()
-    formData.append('num_Turno', informe.num_Turno)
   formData.append('cod_Unidad', informe.cod_Unidad)
+  formData.append('cant_Pacientes_Atendidos', informe.cant_Pacientes_Atendidos)
+  formData.append('cant_Pacientes_Alta', informe.cant_Pacientes_Alta)
+  formData.append('cant_pac_adm', informe.cant_pac_adm)
+  formData.append('cant_Total_Pacientes', informe.cant_Total_Pacientes)
+  formData.append('num_Turno', informe.num_Turno)
+  formData.append('hora_Inf', informe.hora_Inf)
+  formData.append('fecha_Inf', informe.fecha_Inf)
   formData.append('cod_Hptal', informe.cod_Hptal)
   formData.append('cod_Dpto', informe.cod_Dpto)
 
@@ -476,7 +534,7 @@ export async function getAllInformes() {
         'Content-Type': 'application/json',
       },
     })
-      return response.data.informes || []
+    return response.data.informes || []
   } catch (error) {
     console.error('Error al obtener informes:', error.response?.data || error.message)
     return []
@@ -488,25 +546,25 @@ export async function updateInforme(params) {
 }
 
 export async function deleteInforme(numInf,codUnidad,codHptal,codDpto) {
-    const response = await axios.delete(`http://localhost:9090/api/informes/delete/${numInf}/${codUnidad}/${codHptal}/${codDpto}`,{
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    })
-    return response.data 
+  const response = await axios.delete(`http://localhost:9090/api/informes/delete/${numInf}/${codUnidad}/${codHptal}/${codDpto}`,{
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+  return response.data
 }
 
 //---------------------------------TURNO
-export async function createTurno(turno) { 
+export async function createTurno(turno) {
   const formData = new URLSearchParams()
   formData.append('cod_Hptal', turno.cod_Hptal)
   formData.append('cod_Dpto', turno.cod_Dpto)
   formData.append('cod_Unidad', turno.cod_Unidad)
-  formData.append('cod_Medico', turno.cod_Medico)
-  formData.append('num_Turno', turno.num_Turno)
+  formData.append('cod_Medico', turno.cod_Unidad)
+  formData.append('num_Turno', turno.cod_Med)
   formData.append('cant_Pacientes_Atendidos', turno.cant_Pacientes_Atendidos)
   formData.append('cant_Pacientes_Asignados', turno.cant_Pacientes_Asignados)
-  
+
   try {
     const response = await axios.post(`http://localhost:9090/api/turnos/create`, formData.toString(), {
       headers: {
@@ -539,14 +597,14 @@ export async function updateTurno(params) {
 }
 
 export async function deleteTurno(num_Turno,cod_Unidad,cod_Dpto,cod_Hptal) {
- try {
+  try {
     const response = await axios.delete(
-      `http://localhost:9090/api/turnos/delete/${num_Turno}/${cod_Unidad}/${cod_Dpto}/${cod_Hptal}`,
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+        `http://localhost:9090/api/turnos/delete/${num_Turno}/${cod_Unidad}/${cod_Dpto}/${cod_Hptal}`,
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
         },
-      },
     )
     alert(response.statusText)
   } catch (error) {
@@ -565,8 +623,8 @@ export async function getHospitalesConMasDe100Pacientes() {
     return response.data.hospitales || []
   } catch (error) {
     console.error(
-      'Error al obtener hospitales con más de 100 pacientes:',
-      error.response?.data || error.message,
+        'Error al obtener hospitales con más de 100 pacientes:',
+        error.response?.data || error.message,
     )
     return []
   }
@@ -613,4 +671,4 @@ export async function getConsultasExitosas() {
     console.error('Error al obtener consultas exitosas:', error.response?.data || error.message)
     return []
   }
-}   
+}

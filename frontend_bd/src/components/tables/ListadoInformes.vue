@@ -44,13 +44,13 @@ async function cargarDatos() {
 async function eliminarInforme(num_Inf,cod_Unidad,cod_Hptal,cod_Dpto) {
   if (confirm('¿Estás seguro de eliminar este informe?')) {
     try {
-    const resultado= await deleteInforme(num_Inf,cod_Unidad ,cod_Hptal,cod_Dpto)
-    if(resultado.error){
-    alert(resultado.error)
-    }  
-    await cargarDatos()
+      const resultado= await deleteInforme(num_Inf,cod_Unidad ,cod_Hptal,cod_Dpto)
+      if(resultado.error){
+        alert(resultado.error)
+      }
+      await cargarDatos()
     } catch (err) {
-    alert(`❌ Error al eliminar el informe: ${err.message}`)
+      alert(`❌ Error al eliminar el informe: ${err.message}`)
     }
   }
 }
@@ -69,34 +69,34 @@ onMounted(() => {
   <v-container fluid width="80vw" v-else>
     <v-table fixed-header height="400px">
       <thead>
-        <tr>
-          <th v-for="header in headers" :key="header">{{ header }}</th>
-        </tr>
+      <tr>
+        <th v-for="header in headers" :key="header">{{ header }}</th>
+      </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, idx) in data" :key="idx">
-          <td>{{ item.num_Inf }}</td>
-          <td>{{ item.cod_Unidad }}</td>
-          <td>{{ item.cant_PacAt }}</td>
-          <td>{{ item.cant_PacAlta }}</td>
-          <td>{{ item.cant_PacAdm }}</td>
-          <td>{{ item.cant_TotalPac }}</td>
-          <td>{{ item.num_Turno }}</td>
-          <td>{{ item.hora_Inf }}</td>
-          <td>{{ item.fecha_Inf }}</td>
-          <td>{{ item.cod_Hptal }}</td>
-          <td>{{ item.cod_Dpto }}</td>
-          <td class="d-flex justify-start" style="gap: 8px">
-            <v-btn
+      <tr v-for="(item, idx) in data" :key="idx">
+        <td>{{ item.num_Inf }}</td>
+        <td>{{ item.cod_Unidad }}</td>
+        <td>{{ item.cant_PacAt }}</td>
+        <td>{{ item.cant_PacAlta }}</td>
+        <td>{{ item.cant_PacAdm }}</td>
+        <td>{{ item.cant_TotalPac }}</td>
+        <td>{{ item.num_Turno }}</td>
+        <td>{{ item.hora_Inf }}</td>
+        <td>{{ item.fecha_Inf }}</td>
+        <td>{{ item.cod_Hptal }}</td>
+        <td>{{ item.cod_Dpto }}</td>
+        <td class="d-flex justify-start" style="gap: 8px">
+          <v-btn
               icon
               size="x-small"
               color="red"
               title="Eliminar"
               @click="eliminarInforme(item.num_Inf,item.cod_Unidad,item.cod_Hptal, item.cod_Dpto)">
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-          </td>
-        </tr>
+            <v-icon>mdi-delete</v-icon>
+          </v-btn>
+        </td>
+      </tr>
       </tbody>
     </v-table>
   </v-container>

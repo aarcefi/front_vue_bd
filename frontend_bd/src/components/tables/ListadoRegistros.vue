@@ -1,6 +1,5 @@
-<!-- views/ListadoRegistros.vue -->
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import RegistroDialog from '@/components/modals/RegistroDialog.vue'
 import { getAllRegistros, deleteRegistro } from '@/functions.js'
 
@@ -8,6 +7,10 @@ import { getAllRegistros, deleteRegistro } from '@/functions.js'
 const data = ref([])
 const openCreateDialog = ref(false)
 const selectedRegistro = ref(null)
+
+// Filtros
+const unidades = ref([])
+const selectedUnidad = ref('')
 
 // Encabezados de la tabla
 const headers = ref([
@@ -17,8 +20,6 @@ const headers = ref([
   'Causa No Atendido',
   'Estado',
   'Fecha',
-  'Código Hospital',
-  'Código Departamento',
   'Acciones',
 ])
 
@@ -28,15 +29,14 @@ async function cargarDatos() {
     num_Historia_Clinica: r.num_Historia_Clinica,
     cod_Unidad: r.cod_Unidad,
     fue_Atendido: r.fue_Atendido,
-    causa_No_Atendido: r.causa_No_Atendido,
+    causa_No_Atendido: r.causa_No_Atendido || '-',
     estado: r.estado,
     fecha_Registro: r.fecha_Registro,
-    cod_Hptal: r.cod_Hptal,
-    cod_Dpto: r.cod_Dpto 
   }))
+
+  // Cargar opciones para filtros
+  unidades.value = [...new Set(data.value.map(d => d.cod_Unidad))]
 }
-
-
 
 function abrirModalAgregar() {
   selectedRegistro.value = null
@@ -48,16 +48,25 @@ function editarRegistro(registro) {
   openCreateDialog.value = true
 }
 
-async function eliminarRegistro(cod_Unidad,cod_Dpto,cod_Hptal,num_Historia_clinica) {
+async function eliminarRegistro(historia) {
   if (confirm('¿Estás seguro de eliminar este registro?')) {
     try {
-      await deleteRegistro(cod_Unidad,cod_Dpto,cod_Hptal,num_Historia_clinica)
+      await deleteRegistro(historia)
       await cargarDatos()
     } catch (err) {
       alert(`❌ Error al eliminar: ${err.message}`)
     }
   }
 }
+
+// Filtrar datos dinámicamente
+const filteredData = computed(() => {
+  return data.value.filter(item => {
+    let match = true
+    if (selectedUnidad.value) match &&= item.cod_Unidad === selectedUnidad.value
+    return match
+  })
+})
 
 onMounted(() => {
   cargarDatos()
@@ -72,7 +81,22 @@ onMounted(() => {
     </v-btn>
   </v-container>
 
-  <h2 v-if="data.length == 0">No hay contenido para mostrar</h2>
+  <!-- FILTRO -->
+  <v-container fluid class="mt-4">
+    <v-row dense>
+      <v-col cols="12" sm="6">
+        <v-select
+          v-model="selectedUnidad"
+          :items="unidades"
+          label="Filtrar por Unidad"
+          clearable
+          hide-details
+        />
+      </v-col>
+    </v-row>
+  </v-container>
+
+  <h2 v-if="filteredData.length == 0">No hay registros con ese filtro</h2>
   <v-container fluid width="80vw" v-else>
     <v-table fixed-header height="400px">
       <thead>
@@ -81,15 +105,13 @@ onMounted(() => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, idx) in data" :key="idx">
+        <tr v-for="(item, idx) in filteredData" :key="idx">
           <td>{{ item.num_Historia_Clinica }}</td>
           <td>{{ item.cod_Unidad }}</td>
-          <td>{{ item.fue_Atendido }}</td>
+          <td>{{ item.fue_Atendido ? 'Sí' : 'No' }}</td>
           <td>{{ item.causa_No_Atendido }}</td>
-          <td>{{ item.estado  }}</td>
+          <td>{{ item.estado || '-' }}</td>
           <td>{{ item.fecha_Registro }}</td>
-          <td>{{ item.cod_Hptal }}</td>
-          <td>{{ item.cod_Dpto }}</td>
           <td class="d-flex justify-start" style="gap: 8px">
             <v-btn icon size="x-small" color="primary" title="Editar" @click="editarRegistro(item)">
               <v-icon>mdi-pencil</v-icon>
@@ -99,7 +121,7 @@ onMounted(() => {
               size="x-small"
               color="red"
               title="Eliminar"
-              @click="eliminarRegistro( item.cod_Unidad, item.cod_Dpto, item.cod_Hptal,item.num_Historia_Clinica)"
+              @click="eliminarRegistro(item.num_Historia_Clinica)"
             >
               <v-icon>mdi-delete</v-icon>
             </v-btn>
@@ -110,7 +132,11 @@ onMounted(() => {
   </v-container>
 
   <!-- Modal para agregar/editar -->
-  <RegistroDialog v-model="openCreateDialog" :registro="selectedRegistro" @submit="cargarDatos" />
+  <RegistroDialog
+    v-model="openCreateDialog"
+    :registro="selectedRegistro"
+    @submit="cargarDatos"
+  />
 </template>
 
 <style scoped>
